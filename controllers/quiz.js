@@ -157,6 +157,9 @@ exports.check = (req, res, next) => {
 exports.randomplay = (req, res, next) => {
     let duplicada = 1;
     let id;
+    if (req.session.randomPlay === undefined) {
+        req.session.randomPlay = [];
+    }
     let score = req.session.randomPlay.length
     models.quiz.findAll()
     .then(quizzes => {
