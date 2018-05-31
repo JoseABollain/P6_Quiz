@@ -226,3 +226,60 @@ exports.check = (req, res, next) => {
         answer
     });
 };
+
+exports.randomplay = (req, res, next) => {
+    let duplicada = 1;
+    let id;
+    if (req.session.randomPlay === undefined) {
+        req.session.randomPlay = [];
+    }
+    let score = req.session.randomPlay.length
+    models.quiz.findAll()
+    .then(quizzes => {
+        if (req.session.randomPlay.length === quizzes.length) {
+            req.session.randomPlay = [];
+            res.render('quizzes/random_nomore', {score});
+        } else {
+            while (duplicada) {
+                duplicada = 0;
+                id = Math.ceil(Math.random() * (quizzes.length));
+                for (i=0; i<req.session.randomPlay.length; i++) {
+                    if (req.session.randomPlay[i] === id) {
+                        duplicada = 1;
+                    }
+                }    
+            }
+            models.quiz.findById(id)
+            .then(quiz => {
+                res.render('quizzes/random_play', {
+                    score,
+                    quiz
+                });
+            })
+        }      
+    })
+    .catch(error => next(error));
+};
+
+ exports.randomcheck = (req, res, next) => {
+    const {quiz, query, session} = req;
+    let score = req.session.randomPlay.length;
+    const answer = query.answer || "";
+    const result = answer.toLowerCase().trim() === quiz.answer.toLowerCase().trim();
+
+    if (result) {
+        req.session.randomPlay.push(quiz.id);
+        score++;
+    } else {
+        req.session.randomPlay = [];
+    }
+    models.quiz.findAll()
+    .then(quizzes => {  
+        res.render('quizzes/random_result', {
+            score,
+            answer,
+            result
+        }); 
+    })
+    .catch(error => next(error));
+}    
