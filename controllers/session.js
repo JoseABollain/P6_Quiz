@@ -43,6 +43,7 @@ exports.deleteExpiredUserSession = (req, res, next) => {
 // this value is maintained.
 //
 exports.loginRequired = (req, res, next) => {
+
     if (req.session.user) {
         next();
     } else {
